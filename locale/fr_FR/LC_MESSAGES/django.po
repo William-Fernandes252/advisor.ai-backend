@@ -1,0 +1,44 @@
+# Translations for the Back-end of the advisor.ai project project
+# Copyright (C) 2024 William Fernandes Dias
+# William Fernandes Dias <william.winchester1967@gmail.com>, 2024.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.1.0\n"
+"Language: fr-FR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+#: backend/templates/account/account_inactive.html:5
+#: backend/templates/account/account_inactive.html:8
+
+#: backend/users/admin.py:17
+msgid "Personal info"
+msgstr "Personal info"
+
+#: backend/users/admin.py:19
+msgid "Permissions"
+msgstr "Permissions"
+
+#: backend/users/admin.py:30
+msgid "Important dates"
+msgstr "Dates importantes"
+
+#: backend/users/apps.py:7
+msgid "Users"
+msgstr "Utilisateurs"
+
+#: backend/users/forms.py:24
+#: backend/users/tests/test_forms.py:36
+msgid "This username has already been taken."
+msgstr "Ce nom d'utilisateur est déjà pris."
+
+#: backend/users/models.py:15
+msgid "Name of User"
+msgstr "Nom de l'utilisateur"
+
+#: backend/users/views.py:23
+msgid "Information successfully updated"
+msgstr "Informations mises à jour avec succès"

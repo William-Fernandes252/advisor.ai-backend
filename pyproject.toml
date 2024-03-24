@@ -1,0 +1,235 @@
+
+[project]
+name = "advisor-backend"
+version = "0.1.0"
+description = "Back-end for the advisor.ai project."
+authors = [
+  { name = "William Fernandes Dias", email = "william.winchester1967@gmail.com" },
+]
+dependencies = [
+  "python-slugify>=8.0.4",
+  "argon2-cffi>=23.1.0",
+  "redis>=5.0.3",
+  "hiredis>=2.3.2",
+  "celery>=5.3.6",
+  "django-celery-beat>=2.6.0",
+  "django-celery-results>=2.5.1",
+  "django-filter>=24.1",
+  "django==4.2.*",
+  "django-environ>=0.11.2",
+  "django-model-utils>=4.4.0",
+  "django-redis>=5.4.0",
+  "djangorestframework>=3.15.0",
+  "django-cors-headers>=4.3.1",
+  "drf-spectacular>=0.27.1",
+  "setuptools>=69.2.0",
+  "wheel>=0.43.0",
+  "gunicorn>=21.2.0",
+  "psycopg[c]>=3.1.18",
+  "sentry-sdk>=1.43.0",
+  "django-storages[s3]>=1.14.2",
+  "django-anymail[sendgrid]>=10.3",
+  "drf-extensions>=0.7.1",
+  "django-phonenumber-field[phonenumbers]>=7.3.0",
+  "djangorestframework-simplejwt>=5.3.1",
+  "drf-access-policy>=1.5.0",
+  "numpy>=1.26.4",
+  "joblib>=1.3.2",
+  "scipy>=1.12.0",
+  "Cython>=3.0.9",
+  "scikit-surprise>=1.1.3",
+]
+requires-python = "==3.12.*"
+readme = "README.md"
+license = { text = "MIT" }
+
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "--ds=config.settings.test --reuse-db"
+filterwarnings = ["error", "ignore::DeprecationWarning"]
+python_files = ["tests.py", "test_*.py"]
+testpaths = ["apps", "config"]
+python_classes = [
+  "Test-*",
+  "Describe-*",
+  "Context-*",
+  "With-*",
+  "Without-*",
+  "For-*",
+  "When-*",
+  "If-*",
+  "Case-*",
+]
+python_functions = ["test_*", "it_*", "its_*"]
+
+[tool.coverage.run]
+include = ["apps/**"]
+omit = ["*/migrations/*", "*/tests/*"]
+plugins = ["django_coverage_plugin"]
+
+
+[tool.mypy]
+python_version = "3.12"
+check_untyped_defs = true
+ignore_missing_imports = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+
+[[tool.mypy.overrides]]
+# Django migrations should not produce any errors:
+module = "*.migrations.*"
+ignore_errors = true
+
+
+[tool.django-stubs]
+django_settings_module = "config.settings.test"
+
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+  ".bzr",
+  ".direnv",
+  ".eggs",
+  ".git",
+  ".git-rewrite",
+  ".hg",
+  ".mypy_cache",
+  ".nox",
+  ".pants.d",
+  ".pytype",
+  ".ruff_cache",
+  ".svn",
+  ".tox",
+  ".venv",
+  "__pypackages__",
+  "_build",
+  "buck-out",
+  "build",
+  "dist",
+  "node_modules",
+  "venv",
+  "*/migrations/*.py",
+  "staticfiles/*",
+]
+# Same as Django: https://github.com/cookiecutter/cookiecutter-django/issues/4792.
+line-length = 88
+indent-width = 4
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+  "F",
+  "E",
+  "W",
+  "C90",
+  "I",
+  "N",
+  "UP",
+  "YTT",
+  # "ANN", # flake8-annotations: we should support this in the future but 100+ errors atm
+  "ASYNC",
+  "S",
+  "BLE",
+  "FBT",
+  "B",
+  "A",
+  "COM",
+  "C4",
+  "DTZ",
+  "T10",
+  "DJ",
+  "EM",
+  "EXE",
+  "FA",
+  'ISC',
+  "ICN",
+  "G",
+  'INP',
+  'PIE',
+  "T20",
+  'PYI',
+  'PT',
+  "Q",
+  "RSE",
+  "RET",
+  "SLF",
+  "SLOT",
+  "SIM",
+  "TID",
+  "TCH",
+  "INT",
+  # "ARG", # Unused function argument
+  "PTH",
+  "ERA",
+  "PD",
+  "PGH",
+  "PL",
+  "TRY",
+  "FLY",
+  # "NPY",
+  # "AIR",
+  "PERF",
+  # "FURB",
+  # "LOG",
+  "RUF",
+]
+ignore = [
+  "S101",   # Use of assert detected https://docs.astral.sh/ruff/rules/assert/
+  "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
+  "SIM102", # sometimes it's better to nest
+  "ISC001",
+  "COM812",
+]
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-line-length = 120
+
+[tool.ruff.lint.isort]
+force-single-line = false
+
+
+[tool.pdm]
+distribution = false
+
+[tool.pdm.scripts]
+"test" = "pytest --cov=src"
+"test:watch" = "watchfiles 'pytest --cov=src' src tests"
+
+[tool.pdm.dev-dependencies]
+dev = [
+  "mypy>=1.7.1",
+  "pytest<8,>=7.1.3",
+  "pytest-django>=4.8.0",
+  "Faker>=24.3.0",
+  "factory-boy>=3.3.0",
+  "pytest-mock>=3.14.0",
+  "pytest-sugar>=1.0.0",
+  "watchfiles>=0.21.0",
+  "django-stubs[compatible-mypy]>=4.2.7",
+  "djangorestframework-stubs[compatible-mypy]>=3.14.5",
+  "ruff>=0.3.3",
+  "django-debug-toolbar>=4.3.0",
+  "pytest-drf>=1.1.3",
+  "pytest-camel-collect>=1.0.2",
+  "coverage>=7.4.4",
+  "pre-commit>=3.6.2",
+  "django-extensions>=3.2.3",
+  "django-coverage-plugin>=3.1.0",
+  "sphinx>=7.2.6",
+  "sphinx-autobuild>=2024.2.4",
+  "ipdb>=0.13.13",
+  "Werkzeug[watchdog]>=3.0.1",
+]
