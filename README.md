@@ -18,11 +18,15 @@ Moved to [settings](http://cookiecutter-django.readthedocs.io/en/latest/settings
 
 - To create **normal user accounts** for testing, use the command:
 
-        python manage.py createfakeusers
+```bash
+python manage.py createfakeusers
+```
 
 - To create a **superuser account**, use this command:
 
-        python manage.py createsuperuser
+```bash
+python manage.py createsuperuser
+```
 
 For convenience, you can keep your normal user logged in on Chrome and your superuser logged in on Firefox (or similar), so that you can see how the site behaves for both kinds of users.
 
@@ -30,19 +34,25 @@ For convenience, you can keep your normal user logged in on Chrome and your supe
 
 Running type checks with mypy:
 
-    mypy apps
+```bash
+mypy apps
+```
 
 ### Test coverage
 
 To run the tests, check your test coverage, and generate an HTML coverage report:
 
-    coverage run -m pytest
-    coverage html
-    open htmlcov/index.html
+```bash
+coverage run -m pytest
+coverage html
+open htmlcov/index.html
+```
 
 #### Running tests with pytest
 
-    pytest
+```bash
+pytest
+```
 
 ### Celery
 
@@ -50,20 +60,26 @@ This app comes with Celery.
 
 To run a celery worker:
 
-        cd apps
-        celery -A config.celery_app worker -l info
+```bash
+cd apps
+celery -A config.celery_app worker -l info
+```
 
 Please note: For Celery's import magic to work, it is important _where_ the celery commands are run. If you are in the same folder with _manage.py_, you should be right.
 
 To run [periodic tasks](https://docs.celeryq.dev/en/stable/userguide/periodic-tasks.html), you'll need to start the celery beat scheduler service. You can start it as a standalone process:
 
-        cd apps
-        celery -A config.celery_app beat
+```bash
+cd apps
+celery -A config.celery_app beat
+```
 
 or you can embed the beat service inside a worker with the `-B` option (not recommended for production use):
 
-        cd apps
-        celery -A config.celery_app worker -B -l info
+```bash
+cd apps
+celery -A config.celery_app worker -B -l info
+```
 
 ### Email Server
 
