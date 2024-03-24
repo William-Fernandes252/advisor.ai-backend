@@ -77,6 +77,7 @@ warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unused_configs = true
 plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+disable_error_code = ["attr-defined"]
 
 [[tool.mypy.overrides]]
 # Django migrations should not produce any errors:
