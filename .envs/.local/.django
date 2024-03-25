@@ -5,3 +5,4 @@ IPYTHONDIR=/project/.ipython
 # Redis
 # ------------------------------------------------------------------------------
 REDIS_URL=redis://redis:6379/0
+DATABASE_URL=postgres://FPEsicCzyCVdtHimHlKtgpnxoXCWCEjX:xrjk6XJ1es4Blss3mBbfoEmjIBJDedUuZKvOzejMFcoNHzukyK3fsLWeBBQXCFPh@postgres:5432/advisor
