@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:334a8d68df2aa86daef08ab596dc67e1cbc1fe838d45856845dffd47395c925e"
+content_hash = "sha256:52015f27f59d5c0c22ecb8e1bc942c2380a705deb2b9f8190e56ee2e34ad9e10"
 
 [[package]]
 name = "alabaster"
@@ -1443,6 +1443,17 @@ marker = "python_version >= \"3.11\""
 files = [
     {file = "pure_eval-0.2.2-py3-none-any.whl", hash = "sha256:01eaab343580944bc56080ebe0a674b39ec44a945e6d09ba7db3cb8cec289350"},
     {file = "pure_eval-0.2.2.tar.gz", hash = "sha256:2b45320af6dfaa1750f543d714b6d1c520a1688dec6fd24d339063ce0aaa9ac3"},
+]
+
+[[package]]
+name = "pycountry"
+version = "23.12.11"
+requires_python = ">=3.8"
+summary = "ISO country, subdivision, language, currency and script definitions and their translations"
+groups = ["default"]
+files = [
+    {file = "pycountry-23.12.11-py3-none-any.whl", hash = "sha256:2ff91cff4f40ff61086e773d61e72005fe95de4a57bfc765509db05695dc50ab"},
+    {file = "pycountry-23.12.11.tar.gz", hash = "sha256:00569d82eaefbc6a490a311bfa84a9c571cff9ddbf8b0a4f4e7b4f868b4ad925"},
 ]
 
 [[package]]
