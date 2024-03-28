@@ -6,8 +6,6 @@ Back-end of the advisor.ai project, an article search and recommendation platfor
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
-License: MIT
-
 ## Settings
 
 Moved to [settings](http://cookiecutter-django.readthedocs.io/en/latest/settings.html).
