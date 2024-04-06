@@ -1,5 +1,5 @@
-import uuid
 from typing import Self
+from uuid import uuid4
 
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db import models
@@ -8,11 +8,12 @@ from django.utils.translation import gettext_lazy as _
 from model_utils.models import TimeStampedModel
 from slugify import slugify
 
+from common.models import UuidModel
 
-class Author(TimeStampedModel, models.Model):
+
+class Author(TimeStampedModel, UuidModel, models.Model):
     """Model to represent the authors of a paper."""
 
-    id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
     name = models.CharField(max_length=255)
     uri = models.URLField(
         _("Source of the author's information"),
@@ -23,7 +24,10 @@ class Author(TimeStampedModel, models.Model):
     class Meta:
         verbose_name = _("Author")
         verbose_name_plural = _("Authors")
-        indexes = [models.Index(fields=["name"], name="author_name_index")]
+        indexes = [
+            *UuidModel.Meta.indexes,
+            models.Index(fields=["name"], name="author_name_index"),
+        ]
 
     def __str__(self) -> str:
         return self.name
@@ -32,7 +36,7 @@ class Author(TimeStampedModel, models.Model):
 class Location(TimeStampedModel, models.Model):
     """Model to represent the location of a published paper."""
 
-    id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
+    id = models.UUIDField(primary_key=True, editable=False, default=uuid4)
     city = models.CharField(max_length=255, blank=True)
     state = models.CharField(max_length=255, blank=True)
     country = models.CharField(
@@ -44,6 +48,10 @@ class Location(TimeStampedModel, models.Model):
     class Meta:
         verbose_name = _("Location")
         verbose_name_plural = _("Locations")
+        indexes = [
+            models.Index(fields=["country"], name="country_index"),
+            models.Index(fields=["city", "country", "state"], name="location_index"),
+        ]
 
     def __str__(self) -> str:
         """Return a string representation of the location."""
@@ -53,7 +61,7 @@ class Location(TimeStampedModel, models.Model):
 class Keyword(TimeStampedModel, models.Model):
     """Model to represent the keywords of a paper."""
 
-    id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
+    id = models.UUIDField(primary_key=True, editable=False, default=uuid4)
     name = models.CharField(max_length=255)
     slug = models.SlugField(
         _("Slug"), help_text=_("The slug of the keyword"), unique=True, editable=False
@@ -96,10 +104,10 @@ class PaperQuerySet(models.QuerySet):
         return self.annotate(rank=SearchRank(vector, query)).order_by("-rank")
 
 
-class Paper(TimeStampedModel, models.Model):
+class Paper(TimeStampedModel, UuidModel, models.Model):
     """A model to represent a paper."""
 
-    id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
+    uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     title = models.CharField(max_length=255)
     authors = models.ManyToManyField(Author, related_name="papers")
     abstract = models.TextField()
@@ -112,6 +120,7 @@ class Paper(TimeStampedModel, models.Model):
     doi = models.CharField(
         _("DOI"),
         help_text=_("The DOI (Digital Object Identifier) of the paper"),
+        unique=True,
         max_length=255,
         blank=True,
     )
@@ -135,6 +144,7 @@ class Paper(TimeStampedModel, models.Model):
         verbose_name = _("Paper")
         verbose_name_plural = _("Papers")
         indexes = [
+            *UuidModel.Meta.indexes,
             models.Index(fields=["title", "abstract"], name="search_index"),
             models.Index(fields=["-published"], name="published_index"),
         ]

@@ -18,6 +18,7 @@ class PaperViewSet(AccessViewSetMixin, DetailSerializerMixin, viewsets.ModelView
     published on online libraries."""
 
     queryset = models.Paper.objects.all()
+    lookup_field = "uuid"
     serializer_class = serializers.PaperListSerializer
     serializer_detail_class = serializers.PaperDetailSerializer
     access_policy = permissions.PaperAccessPolicy

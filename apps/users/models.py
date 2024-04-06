@@ -1,6 +1,6 @@
-import uuid
 from enum import Enum
 from typing import ClassVar, override
+from uuid import uuid4
 
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import Group as AuthGroup
@@ -8,6 +8,8 @@ from django.db.models import CharField, EmailField, UUIDField
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
+
+from common.models import UuidModel
 
 from .managers import UserManager
 
@@ -22,14 +24,14 @@ class Group(Enum):
     USERS = "users"
 
 
-class User(AbstractUser):
+class User(UuidModel, AbstractUser):
     """
     Default custom user model for Back-end of the advisor.ai project.
     If adding fields that need to be filled at user signup,
     check forms.SignupForm and forms.SocialSignupForms accordingly.
     """
 
-    id = UUIDField(primary_key=True, editable=False, default=uuid.uuid4)
+    uuid = UUIDField("UUID", default=uuid4, editable=False)
     name = CharField(_("Name of the user"), blank=True, max_length=255)
     first_name = None  # type: ignore[assignment]
     last_name = None  # type: ignore[assignment]
@@ -41,6 +43,9 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
     objects: ClassVar[UserManager] = UserManager()
+
+    class Meta(AbstractUser.Meta):
+        indexes = [*UuidModel.Meta.indexes]
 
     @override
     def save(self, *args, **kwargs) -> None:

@@ -20,6 +20,8 @@ services:
       - ./config:/project/config:z
       - ./locale:/project/locale:z
       - ./tests:/project/tests:z
+      - ./common:/project/common:z
+      - ./manage.py:/project/manage.py:z
     env_file:
       - ./.envs/.local/.django
       - ./.envs/.local/.postgres
@@ -51,6 +53,7 @@ services:
       - ./docs:/docs:z
       - ./config:/project/config:z
       - ./apps:/project/apps:z
+      - ./common:/project/common:z
     ports:
       - "9000:9000"
     command: /start-docs

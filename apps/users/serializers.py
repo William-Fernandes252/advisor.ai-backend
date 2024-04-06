@@ -55,6 +55,7 @@ class AdminOnlyFieldsSerializerMixin:
 
 
 class UserSerializer(AdminOnlyFieldsSerializerMixin, serializers.ModelSerializer):
+    id = serializers.UUIDField(source="uuid", read_only=True)
     groups = serializers.SlugRelatedField(
         slug_field="name",
         many=True,
