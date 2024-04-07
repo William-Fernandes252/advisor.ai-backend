@@ -27,9 +27,9 @@ class PaperQuerySet(models.QuerySet):
         """Filter papers with outdated reviews data."""
         now = timezone.now()
         return self.filter(
-            models.Q(reviews_last_updated__isnull=True)
+            models.Q(last_reviews_update__isnull=True)
             | models.Q(
-                reviews_last_updated__lte=now
+                last_reviews_update__lte=now
                 - timezone.timedelta(minutes=PAPERS_REVIEWS_RECALCULATE_MINUTES)
             )
         )

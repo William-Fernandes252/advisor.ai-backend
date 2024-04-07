@@ -58,7 +58,7 @@ class PaperListSerializer(FieldAccessMixin, serializers.ModelSerializer):
             "modified",
             "reviews_average",
             "reviews_count",
-            "reviews_last_updated",
+            "last_reviews_update",
             "score",
         ]
         access_policy = permissions.PaperAccessPolicy

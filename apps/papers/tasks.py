@@ -1,5 +1,6 @@
 from celery import shared_task
-from django.db.models import Avg, Count
+from django.db.models import Avg, Count, F, Window
+from django.db.models.functions import DenseRank
 from django.utils import timezone
 
 from apps.papers import models
@@ -25,7 +26,7 @@ def update_paper_reviews(update_all=None, count: int | None = None):
         .annotate(average=Avg("value"), count=Count("paper_id"))
     )
 
-    queryset = models.Paper.objects.get_queryset().order_by("reviews_last_updated")
+    queryset = models.Paper.objects.get_queryset().order_by("last_reviews_update")
     if not update_all:
         queryset = queryset.filter_outdated_reviews()
 
@@ -35,7 +36,7 @@ def update_paper_reviews(update_all=None, count: int | None = None):
             reviews_average=agg["average"],
             reviews_count=agg["count"],
             score=agg["average"] * agg["count"],
-            reviews_last_updated=timezone.now(),
+            last_reviews_update=timezone.now(),
         )
         updated += 1
         if count and updated >= count:
@@ -47,3 +48,23 @@ def update_paper_reviews(update_all=None, count: int | None = None):
 def update_paper_reviews_outdated():
     """Updates outdated papers reviews data."""
     return update_paper_reviews()
+
+
+@shared_task(name="update_papers_position_embeddings")
+def update_papers_position_embeddings():
+    """Update the papers embeddings.
+
+    Returns:
+        int: The number of papers updated.
+    """
+    updated = 0
+    for paper in (
+        models.Paper.objects.all()
+        .annotate(embedding_index=Window(DenseRank(), order_by=[F("id").asc()]))
+        .annotate(new_index=F("embedding_index") - 1)
+    ):
+        if paper.index != getattr(paper, "new_index", None):
+            paper.index = getattr(paper, "new_index", None)
+            paper.save()
+            updated += 1
+    return updated
