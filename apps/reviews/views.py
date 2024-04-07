@@ -16,8 +16,8 @@ class ReviewViewSet(
 ):
     """List, create, retrieve and delete paper reviews."""
 
-    queryset = models.Review.objects.all().prefetch_related("user")
-    queryset_detail = models.Review.objects.all().prefetch_related("paper", "user")
+    queryset = models.Review.objects.active().prefetch_related("user")
+    queryset_detail = models.Review.objects.active().prefetch_related("paper", "user")
     lookup_field = "uuid"
     serializer_class = serializers.ReviewListSerializer
     serializer_detail_class = serializers.ReviewDetailSerializer
