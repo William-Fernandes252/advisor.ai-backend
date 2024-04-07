@@ -13,6 +13,6 @@ class ReviewsConfig(AppConfig):
 
         post_save.connect(
             signals.deactivate_old_ratings,
-            sender=models.Rating,
+            sender=models.Review,
             dispatch_uid="deactivate_old_ratings",
         )

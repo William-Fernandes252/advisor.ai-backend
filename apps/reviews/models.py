@@ -8,6 +8,8 @@ from common.models import UuidModel
 
 class Review(UuidModel, models.Model):
     class ValueChoices(models.IntegerChoices):
+        """Rating value choices."""
+
         ONE = 1
         TWO = 2
         THREE = 3

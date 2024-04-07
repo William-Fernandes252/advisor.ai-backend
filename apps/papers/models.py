@@ -1,13 +1,14 @@
-from typing import Self
+from decimal import Decimal
 from uuid import uuid4
 
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from model_utils.models import TimeStampedModel
 from slugify import slugify
 
+from apps.papers import managers
 from common.models import UuidModel
 
 
@@ -87,23 +88,6 @@ class Keyword(TimeStampedModel, models.Model):
         return slugify(name)
 
 
-class PaperQuerySet(models.QuerySet):
-    def search(self, value: str) -> Self:
-        """Search for papers.
-
-        Args:
-            query (str): The term to search for. It will be searched in the title
-            and abstract of the papers.
-
-        Returns:
-            QuerySet: A queryset with the search results ordered by the
-            rank of the search.
-        """
-        vector = SearchVector("title") + SearchVector("abstract")
-        query = SearchQuery(value)
-        return self.annotate(rank=SearchRank(vector, query)).order_by("-rank")
-
-
 class Paper(TimeStampedModel, UuidModel, models.Model):
     """A model to represent a paper."""
 
@@ -137,8 +121,14 @@ class Paper(TimeStampedModel, UuidModel, models.Model):
         help_text=_("Link to the PDF of the paper"),
         blank=True,
     )
+    reviews_average = models.DecimalField(
+        max_digits=5, decimal_places=2, blank=True, null=True
+    )
+    reviews_count = models.PositiveIntegerField(blank=True, null=True)
+    reviews_last_updated = models.DateTimeField(blank=True, null=True)
+    score = models.FloatField(blank=True, null=True)
 
-    objects = PaperQuerySet.as_manager()
+    objects = managers.PaperManager()
 
     class Meta:
         verbose_name = _("Paper")
@@ -153,5 +143,33 @@ class Paper(TimeStampedModel, UuidModel, models.Model):
         """Return a string representation of the paper."""
         return self.title
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse("paper-detail", kwargs={"pk": self.pk})
+
+    def get_reviews_average(self) -> Decimal | None:
+        """Calculates the reviews average."""
+        return self.reviews.average()
+
+    def get_reviews_count(self) -> int:
+        """Calculates the number of reviews for the movie."""
+        return self.reviews.count()
+
+    def update_reviews(
+        self, average: Decimal | None = None, count: int | None = None, save=None
+    ) -> None:
+        """Update the reviews data of the paper.
+
+        Args:
+            average (Decimal | None, optional): The updated reviews average.
+            If none is provided, it will be calculated. Defaults to None.
+            count (int | None, optional): The updated reviews count.
+            If none is provided, it will be calculated. Defaults to None.
+            save (_type_, optional): If the paper should be saved after the update.
+            Defaults to None.
+        """
+        self.reviews_average = average or self.get_reviews_average()
+        self.reviews_count = count or self.get_reviews_count()
+        self.score = float(self.reviews_average or 0) * self.reviews_count
+        self.rating_last_updated = timezone.now()
+        if save:
+            self.save()

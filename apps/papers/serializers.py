@@ -53,6 +53,14 @@ class PaperListSerializer(FieldAccessMixin, serializers.ModelSerializer):
     class Meta:
         model = models.Paper
         exclude = ["abstract", "created", "modified", "uuid"]
+        read_only_fields = [
+            "created",
+            "modified",
+            "reviews_average",
+            "reviews_count",
+            "reviews_last_updated",
+            "score",
+        ]
         access_policy = permissions.PaperAccessPolicy
 
     def create(self, validated_data):

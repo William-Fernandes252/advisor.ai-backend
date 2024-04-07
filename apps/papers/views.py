@@ -23,4 +23,4 @@ class PaperViewSet(AccessViewSetMixin, DetailSerializerMixin, viewsets.ModelView
     serializer_detail_class = serializers.PaperDetailSerializer
     access_policy = permissions.PaperAccessPolicy
     filterset_class = filters.PaperFilter
-    ordering_fields = ["-published", "title"]
+    ordering_fields = ["published", "title", "score", "reviews_average"]
