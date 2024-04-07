@@ -132,7 +132,7 @@ class Paper(TimeStampedModel, UuidModel, models.Model):
         help_text="Position index for embeddings", blank=True, null=True
     )
 
-    objects = managers.PaperManager()
+    objects: managers.PaperManager = managers.PaperManager()
 
     class Meta:
         verbose_name = _("Paper")

@@ -1,8 +1,10 @@
 from celery import shared_task
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Avg, Count, F, Window
 from django.db.models.functions import DenseRank
 from django.utils import timezone
 
+from apps.exports.models import Export
 from apps.papers import models
 from apps.reviews.models import Review
 
@@ -48,6 +50,47 @@ def update_paper_reviews(update_all=None, count: int | None = None):
 def update_paper_reviews_outdated():
     """Updates outdated papers reviews data."""
     return update_paper_reviews()
+
+
+@shared_task(name="export_paper_reviews_dataset")
+def export_paper_reviews_dataset(filename: str | None = None) -> str | None:
+    """Exports a dataset with the papers reviews, average and count.
+
+    Args:
+        filename (str | None, optional): A name for the destination file.
+        Defaults to `paper_reviews`.
+
+    Returns:
+        str: The export file path.
+    """
+    return Export.from_dataset(
+        Review.objects.to_dataset(),
+        fieldnames=["userId", "paperId", "rating", "createdAt"],
+        filename=filename or "paper_reviews",
+        content_type=ContentType.objects.get_for_model(Review),
+    ).file.path
+
+
+@shared_task(name="export_papers_dataset")
+def export_papers_dataset():
+    """Exports a dataset with the papers data.
+
+    Returns:
+        str: The export file path.
+    """
+    return Export.from_dataset(
+        models.Paper.objects.to_dataset(),
+        fieldnames=[
+            "paperId",
+            "paperIndex",
+            "title",
+            "publishedAt",
+            "reviewsAverage",
+            "reviewsCount",
+        ],
+        filename="papers",
+        content_type=ContentType.objects.get_for_model(models.Paper),
+    ).file.path
 
 
 @shared_task(name="update_papers_position_embeddings")
