@@ -60,7 +60,7 @@ class User(UuidModel, AbstractUser):
             str: URL for user detail.
 
         """
-        return reverse("user-detail", kwargs={"pk": self.pk})
+        return reverse("user-detail", kwargs={"uuid": self.uuid})
 
     @staticmethod
     def get_default_groups():
