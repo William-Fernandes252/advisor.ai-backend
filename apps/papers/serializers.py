@@ -9,9 +9,11 @@ from apps.papers import models, permissions
 class AuthorSerializer(serializers.ModelSerializer):
     """Serializer for the Author model."""
 
+    id = serializers.UUIDField(source="uuid", read_only=True)
+
     class Meta:
         model = models.Author
-        exclude = ["created", "modified"]
+        exclude = ["created", "modified", "uuid"]
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -39,6 +41,7 @@ class KeywordSerializer(serializers.ModelSerializer):
 class PaperListSerializer(FieldAccessMixin, serializers.ModelSerializer):
     """Serializer for the Paper model."""
 
+    id = serializers.UUIDField(source="uuid", read_only=True)
     keywords = serializers.SlugRelatedField(  # type: ignore[var-annotated]
         "name",
         many=True,
@@ -49,7 +52,15 @@ class PaperListSerializer(FieldAccessMixin, serializers.ModelSerializer):
 
     class Meta:
         model = models.Paper
-        exclude = ["abstract", "created", "modified"]
+        exclude = ["abstract", "created", "modified", "uuid"]
+        read_only_fields = [
+            "created",
+            "modified",
+            "reviews_average",
+            "reviews_count",
+            "reviews_last_updated",
+            "score",
+        ]
         access_policy = permissions.PaperAccessPolicy
 
     def create(self, validated_data):

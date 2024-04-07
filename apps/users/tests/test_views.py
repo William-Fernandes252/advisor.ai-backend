@@ -40,7 +40,7 @@ class JsonArrayAgg(models.aggregates.Aggregate):
 def express_user_for_admin(user: User) -> dict[str, Any]:
     """Express a user as a dictionary."""
     return {
-        "id": str(user.pk),
+        "id": str(user.uuid),
         "email": user.email,
         "phone_number": str(user.phone_number),
         "is_active": user.is_active,
@@ -55,7 +55,7 @@ def express_user_for_admin(user: User) -> dict[str, Any]:
 def express_user_for_client(user: User) -> dict[str, Any]:
     """Express a user as a dictionary."""
     return {
-        "id": str(user.pk),
+        "id": str(user.uuid),
         "email": user.email,
         "phone_number": str(user.phone_number),
         "name": user.name,
@@ -69,7 +69,7 @@ express_users_list = pluralized(express_user_for_admin)
 
 class DescribeUserViewSet(ViewSetTest):
     list_url = lambda_fixture(lambda: url_for("user-list"))
-    detail_url = lambda_fixture(lambda user: url_for("user-detail", user.pk))
+    detail_url = lambda_fixture(lambda user: url_for("user-detail", uuid=user.uuid))
 
     class CaseAdmin(AsUser("admin")):  # type: ignore[misc]
         class DescribeList(
@@ -122,7 +122,7 @@ class DescribeUserViewSet(ViewSetTest):
                 actual = {
                     str(uuid)
                     for uuid in User.objects.exclude(is_superuser=True).values_list(
-                        "id",
+                        "uuid",
                         flat=True,
                     )
                 }
@@ -176,14 +176,14 @@ class DescribeUserViewSet(ViewSetTest):
         ):
             initial_user_ids = precondition_fixture(
                 lambda db: {
-                    str(uuid) for uuid in User.objects.values_list("id", flat=True)
+                    str(uuid) for uuid in User.objects.values_list("uuid", flat=True)
                 },
                 async_=False,
             )
 
             def it_deletes_user(self, user: User, initial_user_ids: set[str]):
-                expected = initial_user_ids - {str(user.pk)}
-                actual = set(User.objects.values_list("id", flat=True))
+                expected = initial_user_ids - {str(user.uuid)}
+                actual = set(User.objects.values_list("uuid", flat=True))
                 assert expected == actual
 
     class CaseAuthenticated(AsUser("user")):  # type: ignore[misc]
@@ -229,14 +229,14 @@ class DescribeUserViewSet(ViewSetTest):
         ):
             initial_user_ids = precondition_fixture(
                 lambda db: {
-                    str(uuid) for uuid in User.objects.values_list("id", flat=True)
+                    str(uuid) for uuid in User.objects.values_list("uuid", flat=True)
                 },
                 async_=False,
             )
 
             def it_deletes_user(self, user: User, initial_user_ids: set[str]):
-                expected = initial_user_ids - {str(user.pk)}
-                actual = set(User.objects.values_list("id", flat=True))
+                expected = initial_user_ids - {str(user.uuid)}
+                actual = set(User.objects.values_list("uuid", flat=True))
                 assert expected == actual
 
     class CaseAnonymous(AsAnonymousUser):
@@ -257,7 +257,7 @@ class DescribeUserViewSet(ViewSetTest):
 
             initial_user_ids = precondition_fixture(
                 lambda db: {
-                    str(uuid) for uuid in User.objects.values_list("id", flat=True)
+                    str(uuid) for uuid in User.objects.values_list("uuid", flat=True)
                 },
                 async_=False,
             )
@@ -271,7 +271,7 @@ class DescribeUserViewSet(ViewSetTest):
                 actual = {
                     str(uuid)
                     for uuid in User.objects.exclude(is_superuser=True).values_list(
-                        "id",
+                        "uuid",
                         flat=True,
                     )
                 }

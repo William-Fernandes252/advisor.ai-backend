@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 @pytest.mark.django_db()
 def test_user_detail():
     user: User = UserFactory()
-    assert reverse("user-detail", kwargs={"pk": user.pk}) == f"/users/{user.pk}/"
+    assert reverse("user-detail", kwargs={"uuid": user.uuid}) == f"/users/{user.uuid}/"
     assert resolve(f"/users/{user.pk}/").view_name == "user-detail"
 
 

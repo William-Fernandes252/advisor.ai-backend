@@ -14,6 +14,7 @@ class UserViewSet(AccessViewSetMixin, ModelViewSet):
     """ViewSet for the User class."""
 
     queryset = User.objects.all()
+    lookup_field = "uuid"
     serializer_class = UserSerializer
     access_policy = UserAccessPolicy
 

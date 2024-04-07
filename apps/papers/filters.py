@@ -1,6 +1,6 @@
 from django_filters import rest_framework as filters
 
-from apps.papers import models
+from apps.papers import models, querysets
 
 
 class PaperFilter(filters.FilterSet):
@@ -26,6 +26,8 @@ class PaperFilter(filters.FilterSet):
         model = models.Paper
         fields = ["title", "authors", "location", "keywords"]
 
-    def search_for_papers(self, queryset: models.PaperQuerySet, name: str, value: str):
+    def search_for_papers(
+        self, queryset: querysets.PaperQuerySet, name: str, value: str
+    ):
         """Search for papers."""
         return queryset.search(value)
