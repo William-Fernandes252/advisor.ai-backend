@@ -23,7 +23,8 @@ COPY pyproject.toml pdm.lock README.md ${appHome}/
 
 # Install dependencies and project into the local packages directory
 WORKDIR ${appHome}
-RUN mkdir __pypackages__ && pdm sync --no-editable --no-isolation
+RUN mkdir __pypackages__ && pdm sync --no-editable --without ml
+RUN pdm sync --no-editable --no-isolation -G ml
 
 # Python 'run' stage
 FROM python as python-run-stage
