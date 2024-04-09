@@ -79,7 +79,8 @@ class Keyword(TimeStampedModel, models.Model):
 
     def save(self, *args, **kwargs):
         """Override the save method to generate the slug."""
-        self.slug = slugify(self.name)
+        if not self.slug:
+            self.slug = slugify(self.name)
         super().save(*args, **kwargs)
 
     @staticmethod
@@ -125,10 +126,13 @@ class Paper(TimeStampedModel, UuidModel, models.Model):
         max_digits=5, decimal_places=2, blank=True, null=True
     )
     reviews_count = models.PositiveIntegerField(blank=True, null=True)
-    reviews_last_updated = models.DateTimeField(blank=True, null=True)
+    last_reviews_update = models.DateTimeField(blank=True, null=True)
     score = models.FloatField(blank=True, null=True)
+    index = models.BigIntegerField(
+        help_text="Position index for embeddings", blank=True, null=True
+    )
 
-    objects = managers.PaperManager()
+    objects: managers.PaperManager = managers.PaperManager()
 
     class Meta:
         verbose_name = _("Paper")
@@ -170,6 +174,6 @@ class Paper(TimeStampedModel, UuidModel, models.Model):
         self.reviews_average = average or self.get_reviews_average()
         self.reviews_count = count or self.get_reviews_count()
         self.score = float(self.reviews_average or 0) * self.reviews_count
-        self.rating_last_updated = timezone.now()
+        self.last_reviews_update = timezone.now()
         if save:
             self.save()

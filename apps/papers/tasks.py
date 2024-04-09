@@ -1,7 +1,12 @@
 from celery import shared_task
-from django.db.models import Avg, Count
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Avg, Count, F, Window
+from django.db.models.functions import DenseRank
 from django.utils import timezone
 
+from apps.exports.models import Export
+from apps.ml import services
+from apps.ml.models import Model
 from apps.papers import models
 from apps.reviews.models import Review
 
@@ -25,7 +30,7 @@ def update_paper_reviews(update_all=None, count: int | None = None):
         .annotate(average=Avg("value"), count=Count("paper_id"))
     )
 
-    queryset = models.Paper.objects.get_queryset().order_by("reviews_last_updated")
+    queryset = models.Paper.objects.get_queryset().order_by("last_reviews_update")
     if not update_all:
         queryset = queryset.filter_outdated_reviews()
 
@@ -35,7 +40,7 @@ def update_paper_reviews(update_all=None, count: int | None = None):
             reviews_average=agg["average"],
             reviews_count=agg["count"],
             score=agg["average"] * agg["count"],
-            reviews_last_updated=timezone.now(),
+            last_reviews_update=timezone.now(),
         )
         updated += 1
         if count and updated >= count:
@@ -47,3 +52,82 @@ def update_paper_reviews(update_all=None, count: int | None = None):
 def update_paper_reviews_outdated():
     """Updates outdated papers reviews data."""
     return update_paper_reviews()
+
+
+@shared_task(name="export_paper_reviews_dataset")
+def export_paper_reviews_dataset(filename: str | None = None) -> str | None:
+    """Exports a dataset with the papers reviews, average and count.
+
+    Args:
+        filename (str | None, optional): A name for the destination file.
+        Defaults to `paper_reviews`.
+
+    Returns:
+        str: The export file path.
+    """
+    return Export.from_dataset(
+        Review.objects.to_dataset(),
+        fieldnames=["userId", "paperId", "rating", "createdAt"],
+        filename=filename or "paper_reviews",
+        content_type=ContentType.objects.get_for_model(Review),
+    ).file.path
+
+
+@shared_task(name="export_papers_dataset")
+def export_papers_dataset():
+    """Exports a dataset with the papers data.
+
+    Returns:
+        str: The export file path.
+    """
+    return Export.from_dataset(
+        models.Paper.objects.to_dataset(),
+        fieldnames=[
+            "paperId",
+            "paperIndex",
+            "title",
+            "publishedAt",
+            "reviewsAverage",
+            "reviewsCount",
+        ],
+        filename="papers",
+        content_type=ContentType.objects.get_for_model(models.Paper),
+    ).file.path
+
+
+@shared_task(name="train_and_export_new_model")
+def train_and_export_new_model(
+    model_type: Model.TypeChoices = Model.TypeChoices.SVD, params: dict | None = None
+):
+    """Trains and exports a new model.
+
+    Args:
+        model_type (str, optional): The model type to train. Defaults to "svd".
+        params (dict | None, optional): The training params. Defaults to None.
+
+    Returns:
+        str: The export file path.
+    """
+    return services.train_and_export_model(
+        model_type=model_type, params=params
+    ).file.path
+
+
+@shared_task(name="update_papers_position_embeddings")
+def update_papers_position_embeddings():
+    """Update the papers embeddings.
+
+    Returns:
+        int: The number of papers updated.
+    """
+    updated = 0
+    for paper in (
+        models.Paper.objects.all()
+        .annotate(embedding_index=Window(DenseRank(), order_by=[F("id").asc()]))
+        .annotate(new_index=F("embedding_index") - 1)
+    ):
+        if paper.index != getattr(paper, "new_index", None):
+            paper.index = getattr(paper, "new_index", None)
+            paper.save()
+            updated += 1
+    return updated
