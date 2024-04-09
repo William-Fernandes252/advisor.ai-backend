@@ -5,6 +5,8 @@ from django.db.models.functions import DenseRank
 from django.utils import timezone
 
 from apps.exports.models import Export
+from apps.ml import services
+from apps.ml.models import Model
 from apps.papers import models
 from apps.reviews.models import Review
 
@@ -90,6 +92,24 @@ def export_papers_dataset():
         ],
         filename="papers",
         content_type=ContentType.objects.get_for_model(models.Paper),
+    ).file.path
+
+
+@shared_task(name="train_and_export_new_model")
+def train_and_export_new_model(
+    model_type: Model.TypeChoices = Model.TypeChoices.SVD, params: dict | None = None
+):
+    """Trains and exports a new model.
+
+    Args:
+        model_type (str, optional): The model type to train. Defaults to "svd".
+        params (dict | None, optional): The training params. Defaults to None.
+
+    Returns:
+        str: The export file path.
+    """
+    return services.train_and_export_model(
+        model_type=model_type, params=params
     ).file.path
 
 
