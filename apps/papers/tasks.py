@@ -13,7 +13,7 @@ from apps.suggestions.models import Suggestion
 from apps.users.models import User
 
 
-def update_paper_reviews(update_all=None, count: int | None = None):
+def update_papers_reviews(update_all=None, count: int | None = None):
     """Updates papers reviews data (average and count).
 
     Args:
@@ -51,9 +51,9 @@ def update_paper_reviews(update_all=None, count: int | None = None):
 
 
 @shared_task(name="update_paper_reviews_outdated")
-def update_paper_reviews_outdated():
+def update_papers_reviews_outdated():
     """Updates outdated papers reviews data."""
-    return update_paper_reviews()
+    return update_papers_reviews()
 
 
 @shared_task(name="export_paper_reviews_dataset")
