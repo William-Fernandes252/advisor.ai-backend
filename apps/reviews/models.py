@@ -17,9 +17,7 @@ class Review(UuidModel, models.Model):
         FIVE = 5
         __empty__ = _("Add your review")
 
-    value = models.SmallIntegerField(
-        null=True, blank=True, choices=ValueChoices.choices
-    )
+    value = models.SmallIntegerField(choices=ValueChoices.choices)
     created = models.DateTimeField(auto_now_add=True)
     active = models.BooleanField(default=True)
     user = models.ForeignKey(
