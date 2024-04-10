@@ -2,6 +2,8 @@ from typing import TYPE_CHECKING
 
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import UserManager as DjangoUserManager
+from django.db.models import Q, QuerySet
+from django.utils import timezone
 
 if TYPE_CHECKING:
     from .models import User  # noqa: F401
@@ -40,3 +42,21 @@ class UserManager(DjangoUserManager["User"]):
             raise ValueError(msg)
 
         return self._create_user(email, password, **extra_fields)
+
+    def recent(self, days: int = 7, ids_only=None) -> list[int] | QuerySet:
+        """Return the users that interacted with the application recently.
+
+        Args:
+            days (int, optional): The days to consider. Defaults to 7.
+            ids_only (bool, optional): Return only the users IDs. Defaults to None.
+
+        Returns:
+            QuerySet | list[int]: The users queryset.
+        """
+        base_date = timezone.now() - timezone.timedelta(days=days)
+        queryset = self.filter(
+            Q(date_joined__gte=base_date) | Q(last_login__gte=base_date)
+        ).values_list("id", flat=True)
+        if ids_only:
+            queryset = queryset.values_list("id", flat=True)
+        return queryset
