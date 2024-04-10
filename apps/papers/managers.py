@@ -12,7 +12,7 @@ class PaperManager(models.Manager):
         """Return papers with outdated rating data."""
         return self.get_queryset().filter_outdated_reviews()
 
-    def popular(self, reverse) -> querysets.PaperQuerySet:
+    def popular(self, reverse=None) -> querysets.PaperQuerySet:
         """Return papers ordered by popularity."""
         return self.get_queryset().popular_on_demand(reverse=reverse)
 
@@ -78,3 +78,22 @@ class PaperManager(models.Manager):
                 data[item["paper_id"]] = []
             data[item["paper_id"]].append(item["user_id"])
         return data
+
+    def order_by_ids(self, ids: list[int]) -> querysets.PaperQuerySet:
+        """Orders the queryset by the given IDs.
+
+        Args:
+            ids (list[int]): The IDs to order by.
+
+        Returns:
+            QuerySet: The ordered queryset.
+        """
+        return (
+            self.get_queryset()
+            .filter(pk__in=ids)
+            .order_by(
+                models.Case(
+                    *[models.When(pk=pk, then=pos) for pos, pk in enumerate(ids)]
+                )
+            )
+        )

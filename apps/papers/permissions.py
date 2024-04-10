@@ -9,6 +9,11 @@ class PaperAccessPolicy(AccessPolicy):
             "effect": "allow",
         },
         {
+            "action": ["suggestions"],
+            "principal": ["authenticated"],
+            "effect": "allow",
+        },
+        {
             "action": ["create", "update", "partial_update", "destroy"],
             "principal": ["admin", "group:operators"],
             "effect": "allow",
