@@ -1,17 +1,12 @@
 from typing import override
 
 from rest_access_policy import AccessViewSetMixin
-from rest_framework import mixins, viewsets
+from rest_framework import viewsets
 
 from apps.suggestions import models, permissions, serializers
 
 
-class SuggestionViewSet(
-    AccessViewSetMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet,
-):
+class SuggestionViewSet(AccessViewSetMixin, viewsets.ReadOnlyModelViewSet):
     """List, and retrieve your paper suggestions."""
 
     queryset = models.Suggestion.objects.all().prefetch_related("paper")

@@ -9,7 +9,7 @@ from apps.papers import filters, models, permissions, serializers
 from apps.suggestions.models import Suggestion
 
 
-class AuthorViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
+class AuthorViewSet(AccessViewSetMixin, viewsets.ReadOnlyModelViewSet):
     """Get information about the authors covered by the platform."""
 
     queryset = models.Author.objects.all()
@@ -17,7 +17,9 @@ class AuthorViewSet(AccessViewSetMixin, viewsets.ModelViewSet):
     access_policy = permissions.PaperAccessPolicy
 
 
-class PaperViewSet(AccessViewSetMixin, DetailSerializerMixin, viewsets.ModelViewSet):
+class PaperViewSet(
+    AccessViewSetMixin, DetailSerializerMixin, viewsets.ReadOnlyModelViewSet
+):
     """List, search and and get details about the latest papers
     published on online libraries."""
 
