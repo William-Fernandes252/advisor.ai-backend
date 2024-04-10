@@ -98,13 +98,11 @@ def export_papers_dataset():
 
 
 @shared_task(name="train_and_export_new_model")
-def train_and_export_new_model(
-    model_type: Model.TypeChoices = Model.TypeChoices.SVD, params: dict | None = None
-):
+def train_and_export_new_model(model_type, params: dict | None = None):
     """Trains and exports a new model.
 
     Args:
-        model_type (str, optional): The model type to train. Defaults to "svd".
+        model_type (str): The model type to train.
         params (dict | None, optional): The training params. Defaults to None.
 
     Returns:
