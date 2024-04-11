@@ -20,11 +20,11 @@ class PaperFilter(filters.FilterSet):
         conjoined=True,
     )
     published = filters.DateTimeFromToRangeFilter()
-    search = filters.CharFilter(method="search_for_papers")
+    search = filters.CharFilter(method="search_for_papers", label="Search")
 
     class Meta:
         model = models.Paper
-        fields = ["title", "authors", "location", "keywords"]
+        fields = ["title", "authors", "location", "keywords", "search"]
 
     def search_for_papers(
         self, queryset: querysets.PaperQuerySet, name: str, value: str
