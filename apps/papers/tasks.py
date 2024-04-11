@@ -50,7 +50,7 @@ def update_papers_reviews(update_all=None, count: int | None = None):
     return updated
 
 
-@shared_task(name="update_paper_reviews_outdated")
+@shared_task(name="update_papers_reviews_outdated")
 def update_papers_reviews_outdated():
     """Updates outdated papers reviews data."""
     return update_papers_reviews()
