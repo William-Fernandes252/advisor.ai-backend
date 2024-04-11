@@ -237,6 +237,10 @@ LOGGING = {
     "root": {"level": "INFO", "handlers": ["console"]},
 }
 
+# Machine Learning
+# ------------------------------------------------------------------------------
+DEFAULT_MODEL_TYPE = env("DEFAULT_MODEL_TYPE", default="svd")
+
 # Celery
 # ------------------------------------------------------------------------------
 if USE_TZ:
@@ -292,12 +296,12 @@ CELERY_BEAT_SCHEDULE = {
     "train_and_export_paper_recommendation_model_daily": {
         "task": "train_and_export_new_model",
         "schedule": crontab(hour=3, minute=0),
-        "args": ["svd"],
+        "args": [DEFAULT_MODEL_TYPE],
     },
     "batch_create_papers_suggestions_daily": {
         "task": "batch_create_papers_suggestions",
         "schedule": crontab(hour=4, minute=30),
-        "args": ["svd"],
+        "args": [DEFAULT_MODEL_TYPE],
         "kwargs": {"max": 5000, "offset": 200},
     },
 }

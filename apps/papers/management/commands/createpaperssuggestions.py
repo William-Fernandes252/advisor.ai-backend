@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandParser
 
 
@@ -8,7 +9,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "model",
             nargs="?",
-            default="svd",
+            default=settings.DEFAULT_MODEL_TYPE,
             type=str,
             help="The model type to train.",
         )

@@ -9,6 +9,9 @@ services:
     build:
       context: .
       dockerfile: ./compose/local/django/Dockerfile
+      args:
+        mlGroups: surprise
+        defaultModelType: svd
     image: advisor_local_django
     container_name: advisor_local_django
     depends_on:
