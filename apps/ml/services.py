@@ -17,6 +17,9 @@ MODEL_TYPE_TO_CLASS: Final[dict[Model.TypeChoices, str]] = {
 def _import_model_class(model_type: Model.TypeChoices) -> type[Model]:
     """Imports the model class for the provided type.
 
+    Note that it can raise an ImportError if the dependency groups of the class
+    dependencies are not installed.
+
     Args:
         model_type (Model.TypeChoices): The type of the model.
 

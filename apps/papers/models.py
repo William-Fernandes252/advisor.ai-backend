@@ -31,6 +31,7 @@ class Author(TimeStampedModel, UuidModel, models.Model):
         ]
 
     def __str__(self) -> str:
+        """Return the name of the author."""
         return self.name
 
 

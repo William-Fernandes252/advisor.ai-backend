@@ -4,6 +4,8 @@ from apps.reviews.querysets import ReviewQuerySet
 
 
 class ReviewManager(models.Manager):
+    """Manager for the Review model."""
+
     def get_queryset(self):
         return ReviewQuerySet(self.model, using=self._db)
 

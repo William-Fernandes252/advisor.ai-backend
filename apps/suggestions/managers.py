@@ -3,6 +3,8 @@ from django.utils import timezone
 
 
 class SuggestionManager(models.Manager):
+    """Manager for the Suggestion model."""
+
     def recent(
         self,
         papers_ids: list[int],

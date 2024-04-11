@@ -7,6 +7,8 @@ from apps.suggestions import managers
 
 
 class Suggestion(models.Model):
+    """Model to represent a user suggestion for a paper."""
+
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     user = models.ForeignKey(
         get_user_model(), on_delete=models.CASCADE, related_name="suggestions"

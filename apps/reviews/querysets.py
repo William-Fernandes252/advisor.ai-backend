@@ -2,6 +2,8 @@ from django.db import models
 
 
 class ReviewQuerySet(models.QuerySet):
+    """Queryset for the Review model."""
+
     def active(self):
         """Return only active reviews."""
         return self.filter(active=True)

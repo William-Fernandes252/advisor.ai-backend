@@ -7,6 +7,8 @@ from common.models import UuidModel
 
 
 class Review(UuidModel, models.Model):
+    """Model to represent a user review for a paper."""
+
     class ValueChoices(models.IntegerChoices):
         """Rating value choices."""
 
@@ -34,4 +36,5 @@ class Review(UuidModel, models.Model):
         indexes = [*UuidModel.Meta.indexes]
 
     def __str__(self) -> str:
+        """Return the rating value of the review."""
         return str(self.value)

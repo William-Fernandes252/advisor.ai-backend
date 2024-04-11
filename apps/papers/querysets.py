@@ -8,6 +8,8 @@ PAPERS_REVIEWS_RECALCULATE_MINUTES = 10
 
 
 class PaperQuerySet(models.QuerySet):
+    """Queryset for the Paper model."""
+
     def search(self, value: str) -> Self:
         """Search for papers.
 
