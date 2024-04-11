@@ -9,9 +9,11 @@ from apps.ml import services
 from apps.ml.models import Model
 from apps.papers import models
 from apps.reviews.models import Review
+from apps.suggestions.models import Suggestion
+from apps.users.models import User
 
 
-def update_paper_reviews(update_all=None, count: int | None = None):
+def update_papers_reviews(update_all=None, count: int | None = None):
     """Updates papers reviews data (average and count).
 
     Args:
@@ -48,10 +50,10 @@ def update_paper_reviews(update_all=None, count: int | None = None):
     return updated
 
 
-@shared_task(name="update_paper_reviews_outdated")
-def update_paper_reviews_outdated():
+@shared_task(name="update_papers_reviews_outdated")
+def update_papers_reviews_outdated():
     """Updates outdated papers reviews data."""
-    return update_paper_reviews()
+    return update_papers_reviews()
 
 
 @shared_task(name="export_paper_reviews_dataset")
@@ -96,13 +98,11 @@ def export_papers_dataset():
 
 
 @shared_task(name="train_and_export_new_model")
-def train_and_export_new_model(
-    model_type: Model.TypeChoices = Model.TypeChoices.SVD, params: dict | None = None
-):
+def train_and_export_new_model(model_type, params: dict | None = None):
     """Trains and exports a new model.
 
     Args:
-        model_type (str, optional): The model type to train. Defaults to "svd".
+        model_type (str): The model type to train.
         params (dict | None, optional): The training params. Defaults to None.
 
     Returns:
@@ -111,6 +111,84 @@ def train_and_export_new_model(
     return services.train_and_export_model(
         model_type=model_type, params=params
     ).file.path
+
+
+@shared_task(name="batch_create_papers_suggestions")
+def batch_create_papers_suggestions(  # noqa: PLR0913
+    model_type: Model.TypeChoices,
+    users_ids: list[int] | None = None,
+    *,
+    max_papers: int = 1000,
+    offset: int = 50,
+    start: int = 0,
+    use_suggestions_up_to_days: int | None = 7,
+):
+    """Generates suggestions for a batch of users.
+
+    Args:
+        model_type (str): The model type to use.
+        users_ids (list[int] | None, optional): The users to generate suggestions to.
+        Defaults to the users that interacted with the application recently.
+        max_papers (int, optional): The maximum number of papers to generate suggestions.
+        Defaults to 1000.
+        offset (int, optional): The number of papers to generate suggestions at a time.
+        Defaults to 50.
+        start (int, optional): The papers start index. Defaults to 0.
+        use_suggestions_up_to_days (int | None, optional): Reuse suggestions up to the given days.
+        Defaults to 7.
+
+    Raises:
+        ValueError: If the model is not found.
+    """  # noqa: E501
+
+    model = services.load_latest_model(model_type)
+    if not model:
+        msg = "Model not found."
+        raise ValueError(msg)
+
+    if users_ids is None:
+        users_ids = User.objects.recent(ids_only=True)  # type: ignore[assignment]
+
+    end = start + offset
+    papers_ids: list[int] = (
+        models.Paper.objects.all().popular().values_list("id", flat=True)[start:end]
+    )
+
+    recent_suggestions = {}
+    if use_suggestions_up_to_days:
+        recent_suggestions = models.Paper.objects.recent_suggestions(
+            users_ids,  # type: ignore[arg-type]
+            papers_ids,
+            days=use_suggestions_up_to_days,
+        )
+
+    count = 0
+    while count < max_papers:
+        suggestions: list[Suggestion] = []
+        for paper_id in papers_ids:
+            users_covered = recent_suggestions.get(paper_id, [])
+            for user_id in users_ids or []:
+                if user_id in users_covered:
+                    continue
+                suggestions.append(
+                    Suggestion(
+                        user_id=user_id,
+                        paper_id=paper_id,
+                        value=model.predict(user_id, paper_id),
+                        model=model,
+                    )
+                )
+            count += 1
+
+        Suggestion.objects.bulk_create(suggestions)
+
+        start += offset
+        end = start + offset
+        papers_ids = (
+            models.Paper.objects.all()
+            .popular()
+            .values_list("id", flat=True)[start : start + offset]
+        )
 
 
 @shared_task(name="update_papers_position_embeddings")

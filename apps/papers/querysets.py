@@ -34,18 +34,18 @@ class PaperQuerySet(models.QuerySet):
             )
         )
 
-    def popular(self, reverse):
+    def popular(self, reverse=None):
         """Order the papers by popularity."""
         order_by = models.F("score")
         if not reverse:
-            order_by = order_by.desc(nulls_last=True)
+            order_by = order_by.desc(nulls_last=True)  # type: ignore[call-arg, arg-type, assignment]
         return self.order_by(order_by)
 
-    def popular_on_demand(self, reverse):
+    def popular_on_demand(self, reverse=None):
         """Order the papers by their current popularity."""
         order_by = models.F("computed_score")
         if not reverse:
-            order_by = order_by.desc(nulls_last=True)
+            order_by = order_by.desc(nulls_last=True)  # type: ignore[call-arg, arg-type, assignment]
         return self.annotate(
             computed_score=models.Sum(
                 models.F("reviews_average") * models.F("reviews_count"),

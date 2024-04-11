@@ -10,7 +10,9 @@ services:
     build:
       context: .
       dockerfile: ./compose/production/django/Dockerfile
-
+      args:
+        mlGroups: surprise
+        defaultModelType: svd
     image: advisor_production_django
     depends_on:
       - postgres

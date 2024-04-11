@@ -4,6 +4,7 @@
 from pathlib import Path
 
 import environ
+from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # apps/
@@ -80,7 +81,14 @@ THIRD_PARTY_APPS = [
     "drf_spectacular",
 ]
 
-LOCAL_APPS = ["apps.users", "apps.papers", "apps.reviews", "apps.exports", "apps.ml"]
+LOCAL_APPS = [
+    "apps.users",
+    "apps.papers",
+    "apps.reviews",
+    "apps.exports",
+    "apps.ml",
+    "apps.suggestions",
+]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -229,6 +237,10 @@ LOGGING = {
     "root": {"level": "INFO", "handlers": ["console"]},
 }
 
+# Machine Learning
+# ------------------------------------------------------------------------------
+DEFAULT_MODEL_TYPE = env("DEFAULT_MODEL_TYPE", default="svd")
+
 # Celery
 # ------------------------------------------------------------------------------
 if USE_TZ:
@@ -263,6 +275,36 @@ CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 CELERY_WORKER_SEND_TASK_EVENTS = True
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html#std-setting-task_send_sent_event
 CELERY_TASK_SEND_SENT_EVENT = True
+# https://docs.celeryq.dev/en/stable/userguide/configuration.html#std-setting-beat_schedule
+CELERY_BEAT_SCHEDULE = {
+    "update_outdated_papers_reviews_every_10_min": {
+        "task": "update_papers_reviews_outdated",
+        "schedule": 60 * 10,
+    },
+    "update_papers_indexes_daily": {
+        "task": "update_papers_position_embeddings",
+        "schedule": crontab(hour=1, minute=0),
+    },
+    "export_movie_ratings_dataset_daily": {
+        "task": "export_movie_ratings_dataset",
+        "schedule": crontab(hour=1, minute=15),
+    },
+    "export_paper_reviews_dataset_daily": {
+        "task": "export_paper_reviews_dataset",
+        "schedule": crontab(hour=2, minute=30),
+    },
+    "train_and_export_paper_recommendation_model_daily": {
+        "task": "train_and_export_new_model",
+        "schedule": crontab(hour=3, minute=0),
+        "args": [DEFAULT_MODEL_TYPE],
+    },
+    "batch_create_papers_suggestions_daily": {
+        "task": "batch_create_papers_suggestions",
+        "schedule": crontab(hour=4, minute=30),
+        "args": [DEFAULT_MODEL_TYPE],
+        "kwargs": {"max": 5000, "offset": 200},
+    },
+}
 
 # django-rest-framework
 # -------------------------------------------------------------------------------

@@ -1,4 +1,5 @@
 from apps.reviews import models, querysets
+from apps.suggestions.models import Suggestion
 
 
 def deactivate_old_ratings(
@@ -19,3 +20,11 @@ def deactivate_old_ratings(
                 old_ratings_queryset.deactivate()
                 instance.active = True
                 instance.save()
+        if (
+            suggestion_queryset := Suggestion.objects.filter(
+                user=instance.user,
+                paper=instance.paper,
+                review__isnull=True,
+            )
+        ).exists():
+            suggestion_queryset.update(review=instance)

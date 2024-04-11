@@ -14,7 +14,7 @@ class ReviewAdmin(admin.ModelAdmin):
     ordering = ("created", "active", "user__email", "value")
     date_hierarchy = "created"
     actions = ["activate", "deactivate"]
-    readonly_fields = ("created", "active", "comment", "user", "paper")
+    readonly_fields = ("created", "active")
 
     @admin.action(description="Activate selected ratings")
     def activate(self, request: HttpRequest, queryset: ReviewQuerySet):
