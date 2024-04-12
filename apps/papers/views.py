@@ -1,14 +1,21 @@
 from typing import override
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import viewsets
 from rest_framework.decorators import action
+from rest_framework.response import Response
 from rest_framework_extensions.mixins import DetailSerializerMixin
 
 from apps.papers import filters, models, permissions, serializers
 from apps.suggestions.models import Suggestion
+from common.utils.cache import vary_on_headers_with_default
 
 
+@method_decorator(
+    [cache_page(60 * 60 * 24), vary_on_headers_with_default()], name="dispatch"
+)
 class AuthorViewSet(AccessViewSetMixin, viewsets.ReadOnlyModelViewSet):
     """Get information about the authors covered by the platform."""
 
@@ -16,9 +23,23 @@ class AuthorViewSet(AccessViewSetMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.AuthorSerializer
     access_policy = permissions.PaperAccessPolicy
 
+    @override
+    def retrieve(self, request, *args, **kwargs) -> Response:
+        return super().retrieve(request, *args, **kwargs)
 
+
+@method_decorator(
+    [cache_page(60 * 60 * 24), vary_on_headers_with_default()], name="retrieve"
+)
+@method_decorator([cache_page(60), vary_on_headers_with_default()], name="list")
+@method_decorator(
+    [cache_page(60), vary_on_headers_with_default("Authentication")],
+    name="suggestions",
+)
 class PaperViewSet(
-    AccessViewSetMixin, DetailSerializerMixin, viewsets.ReadOnlyModelViewSet
+    AccessViewSetMixin,
+    DetailSerializerMixin,
+    viewsets.ReadOnlyModelViewSet,
 ):
     """List, search and and get details about the latest papers
     published on online libraries."""
