@@ -45,6 +45,20 @@ class KeywordInline(admin.StackedInline):
 class PaperAdmin(admin.ModelAdmin):
     """Admin class for the Paper model."""
 
-    list_display = ["title", "published"]
+    list_display = [
+        "title",
+        "published",
+        "reviews_count",
+        "reviews_average",
+        "last_reviews_update",
+        "index",
+    ]
     search_fields = ["title", "abstract"]
+    readonly_fields = [
+        "uuid",
+        "index",
+        "reviews_count",
+        "reviews_average",
+        "last_reviews_update",
+    ]
     inlines = [AuthorInline, KeywordInline]

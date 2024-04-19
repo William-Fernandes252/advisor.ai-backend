@@ -55,6 +55,7 @@ class AdminOnlyFieldsSerializerMixin:
 
 
 class UserSerializer(AdminOnlyFieldsSerializerMixin, serializers.ModelSerializer):
+    id = serializers.UUIDField(source="uuid", read_only=True)
     groups = serializers.SlugRelatedField(
         slug_field="name",
         many=True,
@@ -87,8 +88,8 @@ class UserSerializer(AdminOnlyFieldsSerializerMixin, serializers.ModelSerializer
         }
         admin_only = ("is_superuser", "is_staff", "is_active")
 
-    def create(self, validated_data):
-        groups: Sequence[Group] | None = validated_data.pop("groups")
+    def create(self, validated_data: dict):
+        groups: Sequence[Group] | None = validated_data.pop("groups", None)
         if not groups or len(groups) == 0:
             groups = models.User.get_default_groups()
         user = models.User.objects.create_user(**validated_data)

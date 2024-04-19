@@ -6,6 +6,7 @@ FROM python as python-build-stage
 
 ARG buildEnv=local
 ARG appHome=/project
+ARG mlGroups
 
 # Install apt packages
 RUN apt-get update && apt-get install --no-install-recommends -y \
@@ -23,17 +24,20 @@ COPY pyproject.toml pdm.lock README.md ${appHome}/
 
 # Install dependencies and project into the local packages directory
 WORKDIR ${appHome}
-RUN mkdir __pypackages__ && pdm sync --no-editable --no-isolation
+RUN mkdir __pypackages__ && pdm sync --no-editable -d
+RUN pdm sync --no-editable --no-isolation -G ${mlGroups}
 
 # Python 'run' stage
 FROM python as python-run-stage
 
 ARG buildEnv=local
 ARG appHome=/project
+ARG defaultModelType
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV BUILD_ENV ${buildEnv}
+ENV DEFAULT_MODEL_TYPE ${defaultModelType}
 
 WORKDIR ${appHome}
 

@@ -279,3 +279,6 @@ apps/media/
 .env
 .envs/*
 !.envs/.local/
+
+# Data
+*.sqlite3

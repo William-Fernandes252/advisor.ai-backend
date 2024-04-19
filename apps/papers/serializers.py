@@ -9,9 +9,11 @@ from apps.papers import models, permissions
 class AuthorSerializer(serializers.ModelSerializer):
     """Serializer for the Author model."""
 
+    id = serializers.UUIDField(source="uuid", read_only=True)
+
     class Meta:
         model = models.Author
-        exclude = ["created", "modified"]
+        exclude = ["created", "modified", "uuid"]
 
 
 class LocationSerializer(serializers.ModelSerializer):
@@ -39,6 +41,7 @@ class KeywordSerializer(serializers.ModelSerializer):
 class PaperListSerializer(FieldAccessMixin, serializers.ModelSerializer):
     """Serializer for the Paper model."""
 
+    id = serializers.UUIDField(source="uuid", read_only=True)
     keywords = serializers.SlugRelatedField(  # type: ignore[var-annotated]
         "name",
         many=True,
@@ -49,7 +52,21 @@ class PaperListSerializer(FieldAccessMixin, serializers.ModelSerializer):
 
     class Meta:
         model = models.Paper
-        exclude = ["abstract", "created", "modified"]
+        exclude = [
+            "abstract",
+            "created",
+            "modified",
+            "uuid",
+            "score",
+            "index",
+            "last_reviews_update",
+        ]
+        read_only_fields = [
+            "created",
+            "modified",
+            "reviews_average",
+            "reviews_count",
+        ]
         access_policy = permissions.PaperAccessPolicy
 
     def create(self, validated_data):
@@ -82,10 +99,14 @@ class PaperListSerializer(FieldAccessMixin, serializers.ModelSerializer):
 class PaperDetailSerializer(PaperListSerializer):
     """Serializer for the Paper model."""
 
-    class Meta:
-        model = models.Paper
-        fields = "__all__"
-        access_policy = permissions.PaperAccessPolicy
+    class Meta(PaperListSerializer.Meta):
+        exclude = [
+            "created",
+            "modified",
+            "score",
+            "index",
+            "last_reviews_update",
+        ]
 
     def update(self, instance, validated_data):
         """Update a paper."""

@@ -23,7 +23,7 @@ COPY pyproject.toml pdm.lock README.md /project/
 
 # Install dependencies and project into the local packages directory
 WORKDIR ${appHome}
-RUN mkdir __pypackages__ && pdm sync --no-editable --no-isolation
+RUN mkdir __pypackages__ && pdm sync --no-editable --prod
 
 # Python 'run' stage
 FROM python as python-run-stage
@@ -34,8 +34,6 @@ ARG appHome=/project
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV BUILD_ENV ${buildEnv}
-
-WORKDIR ${appHome}
 
 # Devcontainer dependencies and utils
 RUN apt update && apt install --no-install-recommends -y \
