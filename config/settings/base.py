@@ -104,6 +104,7 @@ AUTH_USER_MODEL = "users.User"
 SIMPLE_JWT = {
     "TOKEN_OBTAIN_SERIALIZER": "apps.users.serializers.UserTokenObtainPairSerializer",
     "USER_ID_CLAIM": "id",
+    "USER_ID_FIELD": "uuid",
 }
 
 
