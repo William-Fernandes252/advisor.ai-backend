@@ -52,14 +52,20 @@ class PaperListSerializer(FieldAccessMixin, serializers.ModelSerializer):
 
     class Meta:
         model = models.Paper
-        exclude = ["abstract", "created", "modified", "uuid"]
+        exclude = [
+            "abstract",
+            "created",
+            "modified",
+            "uuid",
+            "score",
+            "index",
+            "last_reviews_update",
+        ]
         read_only_fields = [
             "created",
             "modified",
             "reviews_average",
             "reviews_count",
-            "last_reviews_update",
-            "score",
         ]
         access_policy = permissions.PaperAccessPolicy
 
@@ -93,10 +99,14 @@ class PaperListSerializer(FieldAccessMixin, serializers.ModelSerializer):
 class PaperDetailSerializer(PaperListSerializer):
     """Serializer for the Paper model."""
 
-    class Meta:
-        model = models.Paper
-        fields = "__all__"
-        access_policy = permissions.PaperAccessPolicy
+    class Meta(PaperListSerializer.Meta):
+        exclude = [
+            "created",
+            "modified",
+            "score",
+            "index",
+            "last_reviews_update",
+        ]
 
     def update(self, instance, validated_data):
         """Update a paper."""

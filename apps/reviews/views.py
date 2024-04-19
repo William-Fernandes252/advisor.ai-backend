@@ -1,5 +1,7 @@
 from typing import override
 
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_access_policy import AccessViewSetMixin
 from rest_framework import mixins, viewsets
 from rest_framework_extensions.mixins import DetailSerializerMixin
@@ -8,6 +10,8 @@ from apps.papers.tasks import batch_create_papers_suggestions
 from apps.reviews import filters, models, permissions, serializers
 
 
+@method_decorator(cache_page(60), name="list")
+@method_decorator(cache_page(60 * 60 * 24), name="retrieve")
 class ReviewViewSet(
     AccessViewSetMixin,
     DetailSerializerMixin,

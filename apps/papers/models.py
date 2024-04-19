@@ -31,6 +31,7 @@ class Author(TimeStampedModel, UuidModel, models.Model):
         ]
 
     def __str__(self) -> str:
+        """Return the name of the author."""
         return self.name
 
 
@@ -92,7 +93,6 @@ class Keyword(TimeStampedModel, models.Model):
 class Paper(TimeStampedModel, UuidModel, models.Model):
     """A model to represent a paper."""
 
-    uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     title = models.CharField(max_length=255)
     authors = models.ManyToManyField(Author, related_name="papers")
     abstract = models.TextField()

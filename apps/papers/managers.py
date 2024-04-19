@@ -5,6 +5,8 @@ from apps.suggestions.models import Suggestion
 
 
 class PaperManager(models.Manager):
+    """Manager for the Paper model."""
+
     def get_queryset(self) -> querysets.PaperQuerySet:
         return querysets.PaperQuerySet(self.model, using=self._db)
 

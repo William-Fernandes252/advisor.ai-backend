@@ -1,8 +1,3 @@
-import asyncio
-import asyncio.constants
-import asyncio.taskgroups
-import asyncio.tasks
-
 from django.core.management.base import BaseCommand
 
 from apps.papers import models
@@ -17,13 +12,25 @@ class Command(BaseCommand):
             "count", type=int, default=10, help="The number of papers to create."
         )
         parser.add_argument(
-            "--authors", type=int, default=1, help="The number of authors per paper."
+            "--authors", type=int, default=3, help="The number of authors to create."
         )
         parser.add_argument(
-            "--keywords", type=int, default=3, help="The number of keywords per paper."
+            "--keywords", type=int, default=50, help="The number of keywords to create."
+        )
+        parser.add_argument(
+            "--authors-per-paper",
+            type=int,
+            default=1,
+            help="The number of authors per paper.",
+        )
+        parser.add_argument(
+            "--keywords-per-paper",
+            type=int,
+            default=5,
+            help="The number of keywords per paper.",
         )
 
-    async def create_fake_authors(self, count: int):
+    def create_fake_authors(self, count: int):
         """Create fake authors.
 
         Args:
@@ -32,11 +39,11 @@ class Command(BaseCommand):
         Returns:
             list[models.Author]: The created authors.
         """
-        return await models.Author.objects.abulk_create(
+        return models.Author.objects.bulk_create(
             [factories.AuthorFactory.build() for _ in range(count)]
         )
 
-    async def create_fake_keywords(self, count: int):
+    def create_fake_keywords(self, count: int):
         """Create fake keywords.
 
         Args:
@@ -45,11 +52,11 @@ class Command(BaseCommand):
         Returns:
             list[models.Keyword]: The created keywords.
         """
-        return await models.Keyword.objects.abulk_create(
+        return models.Keyword.objects.bulk_create(
             [factories.KeywordFactory.build() for _ in range(count)],
         )
 
-    async def create_fake_papers(self, count: int):
+    def create_fake_papers(self, count: int) -> list[models.Paper]:
         """Create fake papers.
 
         Args:
@@ -58,40 +65,22 @@ class Command(BaseCommand):
         Returns:
             list[models.Paper]: The created papers.
         """
-        return await models.Paper.objects.abulk_create(
+        return models.Paper.objects.bulk_create(
             [factories.PaperFactory.build() for _ in range(count)]
         )
 
-    async def _handle(self, *args, **options):
-        count = options["count"]
+    def handle(self, *args, **kwargs):
+        papers = self.create_fake_papers(kwargs["count"])
 
-        for paper in await self.create_fake_papers(count):
-            async with asyncio.taskgroups.TaskGroup() as tg:
-                authors_task = tg.create_task(
-                    self.create_fake_authors(options["authors"])
-                )
-                keywords_task = tg.create_task(
-                    self.create_fake_keywords(options["keywords"])
-                )
-            async with asyncio.taskgroups.TaskGroup() as tg:
-                tg.create_task(
-                    models.Paper.authors.through.objects.abulk_create(
-                        [
-                            models.Paper.authors.through(paper=paper, author=author)
-                            for author in await authors_task
-                        ]
-                    )
-                )
-                tg.create_task(
-                    models.Paper.keywords.through.objects.abulk_create(
-                        [
-                            models.Paper.keywords.through(paper=paper, keyword=keyword)
-                            for keyword in await keywords_task
-                        ]
-                    )
-                )
+        self.create_fake_authors(kwargs["authors"])
+        self.create_fake_keywords(kwargs["keywords"])
 
-        self.stdout.write(self.style.SUCCESS(f"{count} papers created."))
+        for paper in papers:
+            paper.authors.set(
+                models.Author.objects.order_by("?")[: kwargs["authors_per_paper"]]
+            )
+            paper.keywords.set(
+                models.Keyword.objects.order_by("?")[: kwargs["keywords_per_paper"]]
+            )
 
-    def handle(self, *args, **options):
-        return asyncio.run(self._handle(*args, **options))
+        self.stdout.write(self.style.SUCCESS(f"{len(papers)} papers created."))

@@ -27,7 +27,7 @@ class Command(BaseCommand):
         try:
             updated = update_papers_reviews(update_all, count)
             self.stdout.write(
-                self.style.SUCCESS(f"Ratings of {updated} movies updated successfully")
+                self.style.SUCCESS(f"Ratings of {updated} papers updated successfully")
             )
         except Exception as exc:  # noqa: BLE001
             self.stdout.write(self.style.ERROR(str(exc)))

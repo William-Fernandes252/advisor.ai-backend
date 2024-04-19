@@ -1,3 +1,5 @@
+"""Proxies to manage models trained using the scikit-surprise library."""
+
 import pickle
 import tempfile
 from typing import Any, ClassVar, override

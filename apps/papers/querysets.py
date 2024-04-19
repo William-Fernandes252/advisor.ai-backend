@@ -8,6 +8,8 @@ PAPERS_REVIEWS_RECALCULATE_MINUTES = 10
 
 
 class PaperQuerySet(models.QuerySet):
+    """Queryset for the Paper model."""
+
     def search(self, value: str) -> Self:
         """Search for papers.
 
@@ -19,9 +21,15 @@ class PaperQuerySet(models.QuerySet):
             QuerySet: A queryset with the search results ordered by the
             rank of the search.
         """
-        vector = SearchVector("title") + SearchVector("abstract")
+        vector = SearchVector("title", weight="A") + SearchVector(
+            "abstract", weight="B"
+        )
         query = SearchQuery(value)
-        return self.annotate(rank=SearchRank(vector, query)).order_by("-rank")
+        return (
+            self.annotate(rank=SearchRank(vector, query))
+            .filter(rank__gte=0.2)
+            .order_by("-rank")
+        )
 
     def filter_outdated_reviews(self):
         """Filter papers with outdated reviews data."""

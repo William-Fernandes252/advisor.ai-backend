@@ -2,6 +2,8 @@ from rest_access_policy import AccessPolicy
 
 
 class PaperAccessPolicy(AccessPolicy):
+    """Paper access policy."""
+
     statements = [
         {
             "action": ["list", "retrieve"],

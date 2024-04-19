@@ -37,7 +37,7 @@ class KeywordFactory(DjangoModelFactory):
     @lazy_attribute_sequence
     def slug(self: models.Keyword, n: int):
         """Generate a slug for the keyword."""
-        return slugify(self.name)
+        return slugify(self.name + str(n))
 
 
 class PaperFactory(DjangoModelFactory):
@@ -48,6 +48,8 @@ class PaperFactory(DjangoModelFactory):
     published = Faker("date")
     location = LocationFactory()
     doi = Faker("isbn13")
+    uri = Faker("url")
+    pdf = Faker("file_path", extension="pdf")
 
     class Meta:
         model = models.Paper

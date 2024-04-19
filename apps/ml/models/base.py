@@ -49,6 +49,7 @@ class Model(TimeStampedModel, models.Model):
         ordering = ["-created"]
 
     def __str__(self):
+        """Return the model's filename and type."""
         return self.filename + " - " + self.type
 
     def save(self, *args, **kwargs):
